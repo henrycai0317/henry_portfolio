@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -288,6 +288,15 @@
   html[lang="en"] [data-zh]{display:none}
   html[lang="en"] [data-en]{display:revert}
 </style>
+<script>
+  /* restore the saved language before first paint — otherwise a returning
+     zh reader sees a flash of English while the body script boots */
+  try{
+    var savedLang=localStorage.getItem('lang');
+    if(savedLang==='zh'||savedLang==='en')
+      document.documentElement.lang=savedLang==='zh'?'zh-Hant':'en';
+  }catch(e){/* storage blocked (private mode / file://) — keep the default */}
+</script>
 </head>
 <body>
 <div id="spot" aria-hidden="true"></div>
@@ -295,18 +304,18 @@
   <div class="wrap bar">
     <span class="brand">henry_cai<span class="dot">.</span>dev</span>
     <nav id="navDesktop">
-      <a href="#about" data-zh="關於">About</a>
-      <a href="#skills" data-zh="技能">Skills</a>
-      <a href="#ai" data-zh="AI">AI</a>
-      <a href="#work" data-zh="作品">Work</a>
-      <a href="#exp" data-zh="經歷">Experience</a>
-      <a href="#contact" data-zh="聯絡">Contact</a>
+      <a href="#about"><span data-zh>關於</span><span data-en>About</span></a>
+      <a href="#skills"><span data-zh>技能</span><span data-en>Skills</span></a>
+      <a href="#ai"><span data-zh>AI</span><span data-en>AI</span></a>
+      <a href="#work"><span data-zh>作品</span><span data-en>Work</span></a>
+      <a href="#exp"><span data-zh>經歷</span><span data-en>Experience</span></a>
+      <a href="#contact"><span data-zh>聯絡</span><span data-en>Contact</span></a>
     </nav>
     <div class="ctrls">
       <button class="themebtn" id="themebtn" onclick="toggleTheme()" aria-label="Toggle theme">☀</button>
       <div class="langtoggle" role="group" aria-label="Language">
-        <button id="zhBtn" class="on" onclick="setLang('zh')">中文</button>
-        <button id="enBtn" onclick="setLang('en')">EN</button>
+        <button id="zhBtn" onclick="setLang('zh')">中文</button>
+        <button id="enBtn" class="on" onclick="setLang('en')">EN</button>
       </div>
       <button class="hamb" id="hamb" onclick="toggleNav()" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -316,12 +325,12 @@
 </header>
 <div class="navscrim" id="navscrim" onclick="closeNav()"></div>
 <nav class="drawer" id="nav" aria-label="Mobile menu">
-  <a href="#about" data-zh="關於">About</a>
-  <a href="#skills" data-zh="技能">Skills</a>
-  <a href="#ai" data-zh="AI">AI</a>
-  <a href="#work" data-zh="作品">Work</a>
-  <a href="#exp" data-zh="經歷">Experience</a>
-  <a href="#contact" data-zh="聯絡">Contact</a>
+  <a href="#about"><span data-zh>關於</span><span data-en>About</span></a>
+  <a href="#skills"><span data-zh>技能</span><span data-en>Skills</span></a>
+  <a href="#ai"><span data-zh>AI</span><span data-en>AI</span></a>
+  <a href="#work"><span data-zh>作品</span><span data-en>Work</span></a>
+  <a href="#exp"><span data-zh>經歷</span><span data-en>Experience</span></a>
+  <a href="#contact"><span data-zh>聯絡</span><span data-en>Contact</span></a>
 </nav>
 <main class="wrap">
   <section class="hero">
@@ -729,11 +738,19 @@ document.querySelectorAll('.atab').forEach(function(b){
   };
 });
 function setLang(l){
-  document.documentElement.lang=l==='en'?'en':'zh-Hant';
-  document.getElementById('zhBtn').classList.toggle('on',l==='zh');
-  document.getElementById('enBtn').classList.toggle('on',l==='en');
+  var en=l!=='zh';
+  document.documentElement.lang=en?'en':'zh-Hant';
+  document.getElementById('zhBtn').classList.toggle('on',!en);
+  document.getElementById('enBtn').classList.toggle('on',en);
+  try{localStorage.setItem('lang',en?'en':'zh');}catch(e){}
   renderProjects();
 }
+/* the <head> script may have restored zh before paint — sync the toggle to it */
+(function(){
+  var zh=document.documentElement.lang!=='en';
+  document.getElementById('zhBtn').classList.toggle('on',zh);
+  document.getElementById('enBtn').classList.toggle('on',!zh);
+})();
 function toggleTheme(){
   var cur=document.documentElement.getAttribute('data-theme');
   var next=cur==='dark'?'light':'dark';
