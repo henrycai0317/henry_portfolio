@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Henry Cai — Android / Backend Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ THEME ============ */
+  :root, [data-theme="dark"]{
+    --bg:#0C121D;          /* deep blue-black */
+    --bg-2:#111926;
+    --panel:#141E2E;
+    --panel-2:#1A2537;
+    --line:#243247;
+    --line-soft:#1C293C;
+    --ink:#EAF0F8;
+    --ink-dim:#93A3BC;
+    --ink-faint:#5E6E88;
+    --brand:#4C9DE8;       /* tech blue — mobile track */
+    --brand-soft:#16263C;  --brand-ink:#8FC3F2;
+    --back:#C79556;        /* coffee/amber — backend track */
+    --back-soft:#2A2113;   --back-ink:#E0B378;
+    --accent:#C79556;
+    --term-bg:#0E1622; --term-line:#22314A;
+    --shadow:0 24px 60px -30px rgba(0,0,0,.8);
+    --spot:rgba(76,157,232,.14);
+    --grid:rgba(255,255,255,.02);
+  }
+  [data-theme="light"]{
+    --bg:#FCFDFF;          /* clean bright white with faint cool tint */
+    --bg-2:#F2F6FC;
+    --panel:#FFFFFF;
+    --panel-2:#F5F8FD;
+    --line:#DCE6F2;
+    --line-soft:#EAF0F8;
+    --ink:#111A28;
+    --ink-dim:#4E6076;
+    --ink-faint:#8C9CB2;
+    --brand:#2472C8;       --brand-soft:#E7F1FC; --brand-ink:#175CA6;
+    --back:#A9691E;        --back-soft:#FaF0E0; --back-ink:#8A5314;
+    --accent:#A9691E;
+    --term-bg:#0E1622; --term-line:#22314A;   /* terminal stays dark in both */
+    --shadow:0 24px 55px -32px rgba(30,55,95,.28);
+    --spot:rgba(36,114,200,.10);
+    --grid:rgba(20,40,70,.025);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Inter',system-ui,'PingFang TC','Microsoft JhengHei',sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+    transition:background .45s ease,color .35s ease;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:44px 44px;
+  }
+  #spot{position:fixed;width:280px;height:280px;border-radius:50%;pointer-events:none;z-index:0;
+    background:radial-gradient(circle at center,var(--spot) 0%,transparent 60%);
+    transform:translate(-50%,-50%);left:50%;top:16%;opacity:0;transition:opacity .3s}
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 28px}
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+  /* ============ HEADER ============ */
+  header{position:sticky;top:0;z-index:50;
+    background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);transition:background .45s,border-color .35s}
+  .bar{display:flex;align-items:center;gap:18px;height:66px}
+  .brand{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:var(--ink);letter-spacing:.01em}
+  .brand .dot{color:var(--brand)}
+  .bar nav{display:flex;gap:26px;margin-left:auto}
+  .bar nav a{color:var(--ink-dim);text-decoration:none;font-size:13.5px;font-weight:500;position:relative;padding:5px 0;transition:color .2s}
+  .bar nav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:2px;background:var(--brand);transition:right .28s ease;border-radius:2px}
+  .bar nav a:hover{color:var(--ink)}
+  .bar nav a:hover::after{right:0}
+  .ctrls{display:flex;gap:10px;align-items:center;flex-shrink:0}
+  .themebtn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink-dim);cursor:pointer;display:grid;place-items:center;font-size:15px;transition:.25s}
+  .themebtn:hover{border-color:var(--brand);color:var(--brand);transform:translateY(-1px)}
+  .langtoggle{display:flex;border:1px solid var(--line);border-radius:11px;overflow:hidden;
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500}
+  .langtoggle button{background:transparent;color:var(--ink-dim);border:0;cursor:pointer;padding:8px 13px;transition:all .2s;font-family:inherit;font-size:inherit}
+  .langtoggle button.on{background:var(--brand);color:#fff;font-weight:700}
+  /* hamburger — hidden on desktop */
+  .hamb{display:none;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);
+    cursor:pointer;flex-direction:column;justify-content:center;align-items:center;gap:4px;transition:.2s}
+  .hamb span{display:block;width:17px;height:2px;background:var(--ink);border-radius:2px;transition:.28s}
+  .hamb:hover{border-color:var(--brand)}
+  .navscrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:.3s;z-index:90}
+  .navscrim.open{opacity:1;visibility:visible}
+  /* standalone drawer (mobile only) */
+  .drawer{display:none}
+  @media(max-width:760px){
+    .hamb{display:flex}
+    .bar nav{display:none}
+    .drawer{display:flex;position:fixed;top:0;right:0;bottom:0;height:100vh;width:min(74vw,300px);z-index:100;
+      background-color:var(--panel);border-left:1px solid var(--line);
+      flex-direction:column;gap:0;margin:0;padding:84px 0 30px;
+      transform:translateX(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:-20px 0 50px -20px rgba(0,0,0,.6)}
+    .drawer.open{transform:translateX(0)}
+    .drawer a{font-size:16px;font-weight:500;padding:16px 28px;border-bottom:1px solid var(--line-soft);
+      width:100%;color:var(--ink-dim);text-decoration:none;transition:.2s}
+    .drawer a:hover{background:var(--bg-2);color:var(--brand)}
+    body.navopen{overflow:hidden}
+    .hamb.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+    .hamb.open span:nth-child(2){opacity:0}
+    .hamb.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+  }
+
+  /* ============ HERO ============ */
+  .hero{padding:112px 0 76px;position:relative}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--back-ink);letter-spacing:.06em;
+    margin-bottom:28px;display:inline-flex;align-items:center;gap:10px;
+    background:var(--back-soft);border:1px solid color-mix(in srgb,var(--back) 30%,transparent);padding:7px 15px;border-radius:999px}
+  .eyebrow .d{width:7px;height:7px;border-radius:50%;background:var(--back);
+    box-shadow:0 0 0 4px color-mix(in srgb,var(--back) 22%,transparent);animation:pulse 2.6s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 9px transparent}}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:clamp(2.6rem,6.2vw,4.3rem);line-height:1.06;
+    letter-spacing:-.02em;margin-bottom:30px;color:var(--ink)}
+  h1 .b{color:var(--brand)}
+  .lead{font-size:clamp(1.02rem,2vw,1.2rem);color:var(--ink-dim);max-width:58ch;margin-bottom:40px;line-height:1.75}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;font-size:14px;
+    padding:14px 26px;border-radius:12px;transition:transform .18s,box-shadow .25s,background .2s,border-color .2s;letter-spacing:.01em}
+  .btn.primary{background:var(--brand);color:#fff;box-shadow:0 14px 34px -16px var(--brand)}
+  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 20px 42px -16px var(--brand)}
+  .btn.ghost{border:1px solid var(--line);color:var(--ink);background:var(--panel)}
+  .btn.ghost:hover{border-color:var(--brand);color:var(--brand);transform:translateY(-2px)}
+
+  /* terminal */
+  .term{margin-top:60px;background:var(--term-bg);border:1px solid var(--term-line);border-radius:16px;
+    box-shadow:var(--shadow);overflow:hidden;max-width:640px}
+  .term-head{display:flex;align-items:center;gap:8px;padding:13px 17px;border-bottom:1px solid var(--term-line);background:rgba(255,255,255,.02)}
+  .term-head .tl{display:flex;gap:7px}
+  .term-head .tl i{width:11px;height:11px;border-radius:50%;display:block}
+  .tl i:nth-child(1){background:#E06A5B}.tl i:nth-child(2){background:#E0B14E}.tl i:nth-child(3){background:#5FB878}
+  .term-head .fname{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5E6E88;margin-left:6px}
+  .term-body{padding:22px;font-family:'JetBrains Mono',monospace;font-size:13.5px;min-height:200px;line-height:1.85}
+  .ln{display:block;white-space:pre-wrap;opacity:0;transform:translateY(4px);animation:appear .35s forwards}
+  @keyframes appear{to{opacity:1;transform:none}}
+  .ln .p{color:#C79556}.ln .k{color:#4C9DE8}.ln .v{color:#EAF0F8}.ln .c{color:#5E6E88}.ln .ok{color:#5FB878}
+  .caret{display:inline-block;width:8px;height:16px;background:#4C9DE8;vertical-align:-3px;animation:blink 1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  /* ============ SECTION ============ */
+  section{padding:96px 0;position:relative}
+  .shead{margin-bottom:54px;max-width:60ch}
+  .stag{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink-faint);letter-spacing:.05em;margin-bottom:14px}
+  .stag b{color:var(--brand);font-weight:500}
+  h2{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:clamp(1.8rem,3.6vw,2.6rem);letter-spacing:-.015em;color:var(--ink);line-height:1.15}
+  .sdesc{color:var(--ink-dim);margin-top:16px;font-size:15.5px;line-height:1.75}
+
+  /* ============ ABOUT ============ */
+  .about-wrap{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:10px 10px 0;overflow:hidden}
+  .about-tabs{display:flex;gap:6px;padding:8px 8px 0}
+  .atab{font-family:'JetBrains Mono',monospace;font-size:13px;padding:11px 20px;border:0;background:transparent;
+    color:var(--ink-dim);cursor:pointer;border-radius:10px 10px 0 0;transition:.2s;position:relative;font-weight:500}
+  .atab:hover{color:var(--ink)}
+  .atab.on{color:var(--brand);background:var(--panel-2)}
+  .atab.on::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:2px;background:var(--brand);border-radius:2px}
+  .apanel{display:none;padding:34px 38px 40px;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .apanel.on{display:block}
+  .apanel p{color:var(--ink-dim);font-size:15.5px;line-height:1.85;margin-bottom:16px;max-width:70ch}
+  .apanel p:last-child{margin-bottom:0}
+  [data-p="cover"] p:first-child,[data-p="cover"] p:last-child{color:var(--ink)}
+  @media(max-width:640px){.apanel{padding:26px 22px 30px}}
+
+  /* ============ SKILLS ============ */
+  .skillgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:760px){.skillgrid{grid-template-columns:1fr}}
+  .scat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 28px;
+    transition:transform .25s,box-shadow .25s,border-color .25s;border-top:3px solid var(--brand)}
+  .scat:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .scat h3{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-faint);margin-bottom:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:8px 13px;border-radius:9px;
+    background:var(--bg-2);border:1px solid var(--line-soft);color:var(--ink-dim);transition:.2s;cursor:default}
+  .chip:hover{border-color:var(--brand);color:var(--brand-ink);background:var(--brand-soft);transform:translateY(-2px)}
+
+  /* ============ AI ============ */
+  .aigrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:760px){.aigrid{grid-template-columns:1fr}}
+  .aicard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px 30px;
+    transition:transform .25s,box-shadow .25s;border-left:3px solid var(--brand)}
+  .aicard:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .aihd{font-family:'Space Grotesk',sans-serif;font-size:1.18rem;font-weight:600;color:var(--ink);margin-bottom:12px}
+  .aicard p{color:var(--ink-dim);font-size:14.5px;line-height:1.75;margin-bottom:14px}
+  .aitags{display:flex;flex-wrap:wrap;gap:9px}
+
+  /* ============ PROJECTS ============ */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:34px}
+  .filt{font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:9px 18px;border-radius:999px;
+    background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);cursor:pointer;transition:.2s}
+  .filt:hover{border-color:var(--brand);color:var(--ink)}
+  .filt.on{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600}
+  .filt[data-f="mobile"].on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .filt[data-f="backend"].on{background:var(--back);border-color:var(--back);color:#fff}
+  /* carousel: horizontal scroll-snap track */
+  .carousel{position:relative}
+  .pgrid{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;
+    padding:4px 4px 20px;margin:0 -4px;scrollbar-width:none}
+  .pgrid::-webkit-scrollbar{display:none}
+  .card{flex:0 0 calc((100% - 44px) / 3);scroll-snap-align:start;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column}
+  @media(max-width:1000px){.card{flex-basis:calc((100% - 22px) / 2)}}
+  @media(max-width:680px){.card{flex-basis:88%}}
+  .card:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--brand) 40%,var(--line))}
+
+  /* carousel controls */
+  .carctl{display:flex;align-items:center;gap:16px;margin-top:6px}
+  .carbtns{display:flex;gap:8px}
+  .carbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink-dim);cursor:pointer;display:grid;place-items:center;font-size:16px;transition:.2s}
+  .carbtn:hover{border-color:var(--brand);color:var(--brand)}
+  .carbtn:disabled{opacity:.35;cursor:not-allowed}
+  .carbtn:disabled:hover{border-color:var(--line);color:var(--ink-dim)}
+  .cardots{display:flex;gap:7px;flex:1;justify-content:center}
+  .cardot{width:7px;height:7px;border-radius:50%;background:var(--line);border:0;padding:0;cursor:pointer;transition:.2s}
+  .cardot.on{background:var(--brand);width:22px;border-radius:4px}
+  .carcount{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);min-width:44px;text-align:right}
+  .carcount b{color:var(--ink);font-weight:500}
+
+  /* featured card keeps a slightly larger title but same carousel width */
+  .card.feature h4{font-size:1.32rem}
+
+  /* text-only card: a thin tech band at the top instead of an image */
+  .band{display:flex;align-items:center;gap:10px;padding:13px 24px;border-bottom:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.05em;color:var(--ink-faint);
+    background:linear-gradient(180deg,color-mix(in srgb,var(--panel-2) 65%,transparent),transparent)}
+  .band{box-shadow:inset 0 2px 0 var(--brand)}
+  .band .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .band .dot{background:var(--brand)}
+  .band .bnum{margin-left:auto;opacity:.65}
+  .card.compact .cbody{font-size:13.5px}
+
+  .cin{padding:22px 24px 24px;display:flex;flex-direction:column;flex:1}
+  .ctop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+  .ctag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;padding:4px 10px;border-radius:6px;letter-spacing:.03em;background:var(--brand-soft);color:var(--brand-ink)}
+  .clang{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);text-align:right;max-width:55%}
+  .card h4{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:600;margin-bottom:10px;line-height:1.3;color:var(--ink)}
+  .cbody{color:var(--ink-dim);font-size:14px;flex:1;line-height:1.7}
+  .cmetric{margin-top:15px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--back-ink);font-weight:500;
+    background:var(--back-soft);padding:9px 13px;border-radius:9px;border:1px solid color-mix(in srgb,var(--back) 25%,transparent)}
+  .cfoot{margin-top:18px;display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;padding-top:16px;border-top:1px solid var(--line-soft)}
+  .cfoot a{color:var(--brand);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.2s;font-weight:500}
+  .cfoot a:hover{gap:9px}
+  .cfoot .stack{color:var(--ink-faint);margin-left:auto}
+  .cfoot .intl{color:var(--ink-faint)}
+
+  .card h4 .star{color:var(--brand);font-size:.95em}
+  .otherexp{margin-top:26px;padding:20px 22px;background:var(--bg-2);border:1px solid var(--line-soft);border-radius:14px;
+    font-size:13.5px;color:var(--ink-dim);line-height:1.8}
+  .otherexp b{color:var(--ink);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.03em}
+  .otherexp a{color:var(--brand);text-decoration:none}
+  .otherexp a:hover{text-decoration:underline}
+  /* ============ EXPERIENCE ============ */
+  .tl-item{display:grid;grid-template-columns:160px 1fr;gap:28px;padding:30px 0;border-bottom:1px solid var(--line);transition:padding-left .25s}
+  .tl-item:last-child{border-bottom:0}
+  .tl-item:hover{padding-left:10px}
+  @media(max-width:640px){.tl-item{grid-template-columns:1fr;gap:8px}.tl-item:hover{padding-left:0}}
+  .tl-when{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink-faint);padding-top:5px}
+  .tl-role{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:600;color:var(--ink);margin-bottom:3px}
+  .tl-co{color:var(--brand);font-size:12.5px;font-weight:500;margin-bottom:14px;font-family:'JetBrains Mono',monospace}
+  .tl-item ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .tl-item li{color:var(--ink-dim);font-size:14.5px;padding-left:22px;position:relative;line-height:1.65}
+  .tl-item li::before{content:"▸";position:absolute;left:0;color:var(--back);font-size:12px;top:3px}
+
+  /* ============ CONTACT ============ */
+  .contact{text-align:center;padding-bottom:120px}
+  .contact h2{margin-bottom:14px}
+  .cgrid{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:38px}
+  .clink{display:inline-flex;align-items:center;gap:10px;text-decoration:none;background:var(--panel);
+    border:1px solid var(--line);border-radius:13px;padding:16px 22px;color:var(--ink);font-size:14px;
+    font-weight:500;transition:.22s;font-family:'JetBrains Mono',monospace}
+  .clink:hover{border-color:var(--brand);transform:translateY(-3px);color:var(--brand);box-shadow:var(--shadow)}
+  .clink svg{width:18px;height:18px;flex-shrink:0}
+  footer{border-top:1px solid var(--line);padding:34px 0;text-align:center;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:12px}
+
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s,transform .7s}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.ln{opacity:1;transform:none}#spot{display:none}}
+  [data-en]{display:none}
+  html[lang="en"] [data-zh]{display:none}
+  html[lang="en"] [data-en]{display:revert}
+</style>
+</head>
+<body>
+<div id="spot" aria-hidden="true"></div>
+<header>
+  <div class="wrap bar">
+    <span class="brand">henry_cai<span class="dot">.</span>dev</span>
+    <nav id="navDesktop">
+      <a href="#about" data-zh="關於">About</a>
+      <a href="#skills" data-zh="技能">Skills</a>
+      <a href="#ai" data-zh="AI">AI</a>
+      <a href="#work" data-zh="作品">Work</a>
+      <a href="#exp" data-zh="經歷">Experience</a>
+      <a href="#contact" data-zh="聯絡">Contact</a>
+    </nav>
+    <div class="ctrls">
+      <button class="themebtn" id="themebtn" onclick="toggleTheme()" aria-label="Toggle theme">☀</button>
+      <div class="langtoggle" role="group" aria-label="Language">
+        <button id="zhBtn" class="on" onclick="setLang('zh')">中文</button>
+        <button id="enBtn" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="hamb" id="hamb" onclick="toggleNav()" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="navscrim" id="navscrim" onclick="closeNav()"></div>
+<nav class="drawer" id="nav" aria-label="Mobile menu">
+  <a href="#about" data-zh="關於">About</a>
+  <a href="#skills" data-zh="技能">Skills</a>
+  <a href="#ai" data-zh="AI">AI</a>
+  <a href="#work" data-zh="作品">Work</a>
+  <a href="#exp" data-zh="經歷">Experience</a>
+  <a href="#contact" data-zh="聯絡">Contact</a>
+</nav>
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow"><span class="d"></span>
+      <span data-zh>Android × 後端 · 全端工程師</span>
+      <span data-en>Android × Backend · Full-stack Engineer</span>
+    </div>
+    <h1>
+      <span data-zh>打造穩定產品的<br><span class="b">全端</span>工程師</span>
+      <span data-en>Building stable products<br>as a <span class="b">full-stack</span> engineer</span>
+    </h1>
+    <p class="lead">
+      <span data-zh>蔡昶宏 Henry Cai — 5 年以上開發經驗的全端工程師，國泰世華與國泰證券兩大金融 App 實戰。從 Android、Jetpack Compose、Kotlin Multiplatform 到 Spring Boot 後端，能一個人把想法變成上線的產品。</span>
+      <span data-en>Henry Cai — a full-stack engineer with 5+ years of experience, shipping the Cathay United Bank &amp; Cathay Securities apps. From Android, Jetpack Compose and Kotlin Multiplatform to Spring Boot backends, I take ideas from zero to production on my own.</span>
+    </p>
+    <div class="cta-row">
+      <a class="btn primary" href="#work"><span data-zh>看作品</span><span data-en>See the work</span> →</a>
+      <a class="btn ghost" href="https://github.com/henrycai0317" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+    <div class="term" aria-hidden="true">
+      <div class="term-head"><span class="tl"><i></i><i></i><i></i></span><span class="fname">profile.kt — build</span></div>
+      <div class="term-body" id="log"></div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="shead reveal">
+      <div class="stag">// <b data-zh>關於</b><b data-en>about</b></div>
+      <h2 data-zh>關於我</h2><h2 data-en>About me</h2>
+    </div>
+    <div class="about-wrap reveal">
+      <div class="about-tabs">
+        <button class="atab on" data-t="intro"><span data-zh>自我介紹</span><span data-en>Intro</span></button>
+        <button class="atab" data-t="cover"><span data-zh>求職信</span><span data-en>Cover letter</span></button>
+      </div>
+
+      <div class="apanel on" data-p="intro">
+        <p data-zh>我是蔡昶宏 Henry，一名 5 年以上經驗的全端工程師。從電機工程背景自費轉職進軟體，這段經歷讓我習慣把陌生的問題拆解、學會、再做出來——這也是我最喜歡工作的部分。</p>
+        <p data-zh>這幾年在國泰世華與國泰證券，我參與兩大金融 App 從功能開發、資安檢測到上架的完整流程，也主導過核心功能改版與新技術導入（Jetpack Compose、Android 16 適配）。工作之外，我用 Kotlin Multiplatform、Spring Boot、Node.js 做自己的全端專案，前端到後端一手包辦。</p>
+        <p data-zh>我做事的方式是「解決問題導向」：先搞清楚真正要解的是什麼，再選對工具，然後穩穩地把它交付上線。我喜歡把複雜的東西做得清楚、把想法變成能用的產品。</p>
+
+        <p data-en>I'm Henry Cai, a full-stack engineer with 5+ years of experience. I moved into software from an electrical-engineering background through a self-funded pivot — an experience that taught me to break down unfamiliar problems, learn fast, and ship. That's still the part of the job I enjoy most.</p>
+        <p data-en>At Cathay United Bank and Cathay Securities, I've worked across two major fintech apps end to end — feature development, security review, and release — and led core revamps and new-tech adoption (Jetpack Compose, Android 16). Outside work I build my own full-stack projects with Kotlin Multiplatform, Spring Boot and Node.js — front to back, on my own.</p>
+        <p data-en>I work in a problem-first way: understand what actually needs solving, pick the right tool, and deliver it to production reliably. I like making complex things clear and turning ideas into things people can use.</p>
+      </div>
+
+      <div class="apanel" data-p="cover">
+        <p data-zh>您好，</p>
+        <p data-zh>我在金融業累積了將近四年經驗，橫跨銀行與證券兩種業態，把金融 App 從開發、資安、內控到上架的完整流程都走過一遍。金融業給了我很扎實的工程紀律，而我這兩年也持續在工作之外投入跨平台與後端的專案——Kotlin Multiplatform、Spring Boot、Node.js。</p>
+        <p data-zh>我很清楚自己下一階段想要的，是產業與技術棧都更多元的環境，能把行動端的深度和逐步累積的後端能力都發揮出來，而不是在同一種產品型態裡重複。我特別希望加入一個結果導向、能遠端高效協作的團隊。</p>
+        <p data-zh>如果我的背景和團隊需要的方向相符，很期待有機會進一步聊聊。謝謝您的時間。</p>
+        <p data-zh>蔡昶宏 Henry Cai 敬上</p>
+
+        <p data-en>Hello,</p>
+        <p data-en>I've spent nearly four years in fintech, across both banking and securities, taking financial apps through the full cycle — development, security, internal controls, and release. That environment gave me solid engineering discipline, and over the past two years I've also invested heavily in cross-platform and backend projects of my own: Kotlin Multiplatform, Spring Boot, and Node.js.</p>
+        <p data-en>What I'm looking for next is a more varied environment — in both industry and stack — where I can bring both my depth in mobile and my growing backend ability to bear, rather than repeating the same product patterns. I'm especially drawn to results-oriented teams that collaborate well remotely.</p>
+        <p data-en>If my background fits what your team needs, I'd love to talk further. Thank you for your time.</p>
+        <p data-en>Best regards,<br>Henry Cai</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="shead reveal">
+      <div class="stag">// <b data-zh>技能</b><b data-en>skills</b></div>
+      <h2 data-zh>全端技術棧</h2><h2 data-en>Full-stack toolkit</h2>
+      <p class="sdesc" data-zh>從 Android 到後端服務，一套技能獨立交付完整產品。</p>
+      <p class="sdesc" data-en>From Android to backend services — one toolkit to ship a whole product on my own.</p>
+    </div>
+    <div class="skillgrid reveal">
+      <div class="scat">
+        <h3 data-zh>語言</h3><h3 data-en>Languages</h3>
+        <div class="chips">
+          <span class="chip">Kotlin</span>
+          <span class="chip">Java</span>
+          <span class="chip">TypeScript</span>
+          <span class="chip">Python</span>
+          <span class="chip">C#</span>
+        </div>
+      </div>
+      <div class="scat">
+        <h3 data-zh>前端 / 行動端</h3><h3 data-en>Frontend / Mobile</h3>
+        <div class="chips">
+          <span class="chip">Jetpack Compose</span>
+          <span class="chip">Coroutines / Flow</span>
+          <span class="chip">MVVM / MVI</span>
+          <span class="chip">Kotlin Multiplatform</span>
+          <span class="chip">Compose Multiplatform</span>
+          <span class="chip">Material 3</span>
+          <span class="chip">Navigation Compose</span>
+          <span class="chip">Room</span>
+          <span class="chip">CameraX / ML Kit</span>
+          <span class="chip">Custom View</span>
+          <span class="chip">WebView / JS Bridge</span>
+          <span class="chip">Paging3</span>
+          <span class="chip">React / Next.js</span>
+        </div>
+      </div>
+      <div class="scat">
+        <h3 data-zh>後端 / 系統</h3><h3 data-en>Backend / Systems</h3>
+        <div class="chips">
+          <span class="chip">Spring Boot</span>
+          <span class="chip">Ktor</span>
+          <span class="chip">Node.js</span>
+          <span class="chip">FastAPI</span>
+          <span class="chip">WebSocket</span>
+          <span class="chip">RabbitMQ</span>
+          <span class="chip">Redis</span>
+          <span class="chip">PostgreSQL / JPA</span>
+          <span class="chip">Spring Security / JWT</span>
+          <span class="chip">REST API</span>
+          <span class="chip">Firebase</span>
+        </div>
+      </div>
+      <div class="scat">
+        <h3 data-zh>工具</h3><h3 data-en>Tools</h3>
+        <div class="chips">
+          <span class="chip">Git</span>
+          <span class="chip">Android Studio</span>
+          <span class="chip">Postman</span>
+          <span class="chip">Bitbucket / GitLab</span>
+          <span class="chip">JIRA / Trello</span>
+          <span class="chip">JUnit</span>
+          <span class="chip">Agile / Scrum</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ai">
+    <div class="shead reveal">
+      <div class="stag">// <b data-zh>AI 應用</b><b data-en>ai</b></div>
+      <h2 data-zh>用 AI，也做 AI</h2><h2 data-en>Building with AI, and building AI</h2>
+      <p class="sdesc" data-zh>把 AI 當成貫穿前後端的生產力工具，也能把 AI 能力做進產品。</p>
+      <p class="sdesc" data-en>AI as a productivity tool across the whole stack — and AI built into the products themselves.</p>
+    </div>
+    <div class="aigrid reveal">
+      <div class="aicard">
+        <div class="aihd" data-zh>用 AI 加速開發</div><div class="aihd" data-en>Developing with AI</div>
+        <p data-zh>以 AI 工具輔助跨前後端的開發、除錯與程式審查，能快速在陌生技術棧（Kotlin Multiplatform、Spring Boot）上產出——這也是我能在短時間內獨立完成 Chirp 全端專案的關鍵。</p>
+        <p data-en>I use AI tooling to accelerate development, debugging and code review across the full stack, ramping up fast on unfamiliar stacks (Kotlin Multiplatform, Spring Boot) — a big reason I could build the full-stack Chirp project solo in a short time.</p>
+      </div>
+      <div class="aicard">
+        <div class="aihd" data-zh>把 AI 做進產品</div><div class="aihd" data-en>Building AI into products</div>
+        <p data-zh>從實際產品到自主專案都有 AI 整合經驗：</p>
+        <p data-en>Hands-on AI integration across shipped products and personal projects:</p>
+        <div class="aitags">
+          <span class="chip">CUBE AI 即時翻譯</span>
+          <span class="chip">AI Mentor</span>
+          <span class="chip">Speech-to-Speech 語音互動</span>
+          <span class="chip">Humanoid Robot 對話 AI</span>
+          <span class="chip">端上 ML 人臉辨識</span>
+          <span class="chip">Voice Agent · FastAPI+OpenAI</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="shead reveal">
+      <div class="stag">// <b data-zh>作品</b><b data-en>work</b></div>
+      <h2 data-zh>精選作品</h2><h2 data-en>Selected Work</h2>
+      <p class="sdesc" data-zh>金融產品實戰成果，加上自主開發的全端專案。</p>
+      <p class="sdesc" data-en>Shipped fintech work plus self-built full-stack projects.</p>
+    </div>
+    <div class="carousel">
+      <div class="pgrid reveal" id="pgrid"></div>
+      <div class="carctl">
+        <div class="carbtns">
+          <button class="carbtn" id="carPrev" aria-label="Previous">←</button>
+          <button class="carbtn" id="carNext" aria-label="Next">→</button>
+        </div>
+        <div class="cardots" id="carDots"></div>
+        <div class="carcount"><b id="carCur">1</b> / <span id="carTot">8</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="exp">
+    <div class="shead reveal">
+      <div class="stag">// <b data-zh>經歷</b><b data-en>experience</b></div>
+      <h2 data-zh>工作歷程</h2><h2 data-en>Where I've worked</h2>
+    </div>
+    <div class="reveal">
+      <div class="tl-item">
+        <div class="tl-when">2024.07 — <span data-zh>現在</span><span data-en>Present</span></div>
+        <div>
+          <div class="tl-role" data-zh>軟體工程師</div><div class="tl-role" data-en>Software Engineer</div>
+          <div class="tl-co">Cathay United Bank · 國泰世華</div>
+          <ul>
+            <li data-zh>主導 Annual Review、貸款改版、投資改版等核心功能開發，於 Agile 環境中準時交付</li>
+            <li data-en>Led Annual Review, loan and investment revamps and other core features; delivered on time in an Agile environment</li>
+            <li data-zh>推動 AI Mentor 功能開發，參與 XR/Vision Pro 工作小組研究 Speech-to-Speech 語音互動功能</li>
+            <li data-en>Drove AI Mentor feature development; joined the XR/Vision Pro group researching speech-to-speech voice interaction</li>
+            <li data-zh>舉辦 Jetpack Compose 技術分享，提升團隊技術能量並評估新需求開發可行性</li>
+            <li data-en>Ran Jetpack Compose tech-sharing sessions, raising team capability and assessing feasibility of new requirements</li>
+            <li data-zh>維護並優化 App 產品效能與穩定性，持續改善使用者體驗</li>
+            <li data-en>Maintained and optimized app performance and stability, continuously improving the user experience</li>
+            <li data-zh>開發年度回顧浮動小網，配合年度行銷活動提升 App 內互動體驗</li>
+            <li data-en>Built the floating year-in-review mini-web for the annual campaign, boosting in-app engagement</li>
+            <li data-zh>因應 Android 16 政策：返回預覽、摺疊機與轉向 UI 全面適配</li>
+            <li data-en>Handled Android 16 changes: predictive back, foldable and orientation UI support</li>
+            <li data-zh>個人 AI 專案獲 2025 公司創新提案前 5 名</li>
+            <li data-en>Personal AI project ranked top-5 in the 2025 company innovation awards</li>
+            <li data-zh>跨部門協作 UI/UX、PM、iOS、後端，全程參與專案生命週期</li>
+            <li data-en>Collaborated across UI/UX, PM, iOS and backend teams through the full project lifecycle</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-when">2022.06 — 2024.04</div>
+        <div>
+          <div class="tl-role" data-zh>軟體工程師</div><div class="tl-role" data-en>Software Engineer</div>
+          <div class="tl-co">Cathay Securities · 國泰證券</div>
+          <ul>
+            <li data-zh>依規格實作功能，項目包含帳務、下單、智慧加減碼、即時報價、行銷功能（敏捷開發）</li>
+            <li data-en>Implemented features to spec — accounts, order placement, smart DCA, live quotes, marketing (Agile)</li>
+            <li data-zh>相關功能元件化，提升團隊開發效率</li>
+            <li data-en>Componentized features to improve team development efficiency</li>
+            <li data-zh>維護線上產品功能正常與線上問題查找</li>
+            <li data-en>Maintained production functionality and investigated live issues</li>
+            <li data-zh>線上產品功能優化與 Unit Test 開發，提升產品穩定</li>
+            <li data-en>Optimized production features and built unit tests to improve stability</li>
+            <li data-zh>APP 上架作業（Build APK、資安、內控相關規範作業與上架）</li>
+            <li data-en>Owned release process: APK builds, security, internal-control compliance and store submission</li>
+            <li data-zh>確認需求規格，評估開發可行性及方法</li>
+            <li data-en>Clarified requirements and assessed development feasibility and approach</li>
+            <li data-zh>與 UI/UX、產品經理、iOS、後端針對需求、規格與測試結果進行討論</li>
+            <li data-en>Discussed requirements, specs and test results with UI/UX, PM, iOS and backend</li>
+            <li data-zh>實作經驗：MVVM design patterns、Coroutine、Socket、Custom View</li>
+            <li data-en>Hands-on with MVVM design patterns, Coroutines, Socket, Custom View</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-when">2021.08 — 2022.05</div>
+        <div>
+          <div class="tl-role" data-zh>軟體工程師</div><div class="tl-role" data-en>Software Engineer</div>
+          <div class="tl-co">Shoalter Technology</div>
+          <ul>
+            <li data-zh>開發 HK Shopping Mall App UI 畫面，協助團隊處理二手市集 WebView 頁面嵌入</li>
+            <li data-en>Built HK Shopping Mall app UI and helped embed the second-hand market WebView pages</li>
+            <li data-zh>App 功能維護：API 串接問題處理、DeepLink 轉導、UI 動畫優化與跑版處理</li>
+            <li data-en>Maintained the app: API integration fixes, DeepLink routing, UI animation and layout-bug fixes</li>
+            <li data-zh>於大型專案運用 Glide 進行圖片載入與 App 效能優化</li>
+            <li data-en>Used Glide for image loading and app performance optimization on a large-scale project</li>
+            <li data-zh>與香港 PM 團隊溝通協調，維護 App 效能並協助處理問題</li>
+            <li data-en>Coordinated with the HK PM team to maintain performance and resolve app issues</li>
+            <li data-zh>與 App Team 協同合作進行 App 效能優化</li>
+            <li data-en>Worked with the App Team on performance optimization</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-when">2020.10 — 2021.03</div>
+        <div>
+          <div class="tl-role" data-zh>電機轉軟體 · 632 小時養成班</div><div class="tl-role" data-en>Electrical → Software · 632-hr bootcamp</div>
+          <div class="tl-co">NTUT · 北科大 Java &amp; Android</div>
+          <ul>
+            <li data-zh>從電機工程師自費轉職，完成 Java / Kotlin / Android 全訓</li>
+            <li data-en>Self-funded pivot from an electrical engineer role into software</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact reveal">
+    <div class="stag" style="text-align:center">// <span data-zh>聯絡</span><span data-en>contact</span></div>
+    <h2 data-zh>來聊聊吧</h2><h2 data-en>Let's talk</h2>
+    <p class="sdesc" style="margin:14px auto 0" data-zh>正在尋找可以展現我對軟體工程的熱愛、有海外發展機會，且對全遠端制度開放文化的職缺。歡迎來信。</p>
+    <p class="sdesc" style="margin:14px auto 0" data-en>Looking for a role where I can bring my passion for software engineering — with room to grow overseas and a culture open to fully-remote work. Reach out anytime.</p>
+    <div class="cgrid">
+      <a class="clink" href="mailto:alaba.havai@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        alaba.havai@gmail.com
+      </a>
+      <a class="clink" href="https://github.com/henrycai0317" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.66-.22.66-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.8-.22 1.65-.33 2.5-.33.85 0 1.7.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85v2.74c0 .27.16.58.67.48A10 10 0 0 0 22 12c0-5.52-4.48-10-10-10z"/></svg>
+        github.com/henrycai0317
+      </a>
+      <a class="clink" href="https://www.linkedin.com/in/cai-henry" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
+        in/cai-henry
+      </a>
+    </div>
+  </section>
+</main>
+<footer>
+  <span data-zh>© 2026 蔡昶宏 Henry Cai · 用 Kotlin 手刻</span>
+  <span data-en>© 2026 Henry Cai · hand-built with Kotlin</span>
+</footer>
+<script>
+// ┌─────────────────────────────────────────────────────────────┐
+// │  上傳專案截圖教學：                                            │
+// │  1. 在 GitHub repo 建一個 images/ 資料夾                       │
+// │  2. 把截圖放進去，檔名對應下方每個專案的 img 欄位              │
+// │     例如 images/cube.png、images/chirp-front.png ...          │
+// │  3. 有 img 檔案就會自動顯示截圖，沒有就顯示預設 icon 佔位圖    │
+// │  （img 欄位留空字串 "" 代表尚未上傳，會顯示佔位圖）            │
+// └─────────────────────────────────────────────────────────────┘
+const projects=[
+  {track:"backend",lang:"Kotlin",icon:"⚙️",star:true,img:"images/chirp-back.png",zh:{tag:"全端 · 個人專案",name:"Chirp 即時通訊後端",body:"業界級標準打造的多模組、事件驅動即時聊天後端，5 個模組（app / user / chat / notification / common），歷時約半年。WebSocket 即時訊息、RabbitMQ 事件解耦、Redis 快取、JWT 驗證、Firebase 推播。",metric:""},en:{tag:"Full-stack · personal",name:"Chirp — Realtime Chat Backend",body:"A multi-module, event-driven realtime chat backend with a 5-module architecture. WebSocket messaging, RabbitMQ event decoupling, Redis caching, JWT auth, Firebase push.",metric:""},stack:"Spring Boot · WebSocket · RabbitMQ · Redis · JPA",repo:"https://github.com/henrycai0317/Chirp_Backend"},
+  {track:"mobile",lang:"Kotlin",icon:"💬",img:"images/chirp-front.png",zh:{tag:"跨平台 · 個人專案",name:"Chirp KMP 跨平台前端",body:"對應上述後端的用戶端：以 Kotlin Multiplatform 一套程式碼跨 Android / iOS / Desktop。自建 Design System、依裝置尺寸做 Adaptive UI、封裝網路層與事件流。",metric:""},en:{tag:"Cross-platform · personal",name:"Chirp — KMP Cross-platform Frontend",body:"The client for the backend above: one Kotlin Multiplatform codebase across Android / iOS / Desktop. Custom design system, adaptive UI by device size, shared network & event layers.",metric:""},stack:"KMP · Compose MP · Ktor · Koin",repo:"https://github.com/henrycai0317/Chirp_Frontend"},
+  {track:"mobile",lang:"Kotlin",icon:"📈",img:"images/cube-invest.png",zh:{tag:"金融 · 核心模組",name:"CUBE App 投資 / 基金 / 債券 / 資金需求專區",body:"國泰金融 App 內多個核心理財模組：基金申購清單、獨立債券牌卡、投資總覽、資金需求（貸款）專區。長期維護，含證券開戶送件檢核、Firebase 埋點、Feature Toggle 分版控管。",metric:""},en:{tag:"Fintech · core modules",name:"CUBE App — Investment / Fund / Bond Hub",body:"Multiple core wealth modules in a major fintech app: fund subscription, bond cards, investment overview, financing hub. Long-term ownership, account-opening checks, Firebase analytics, feature-toggle release control.",metric:""},stack:"Kotlin · Compose · MVVM · Firebase"},
+  {track:"mobile",lang:"Kotlin",icon:"🌐",img:"images/cube-translate.png",zh:{tag:"金融 · 千萬級用戶",name:"CUBE App AI 即時翻譯",body:"為千萬級用戶的行動銀行導入 AI 即時翻譯，讓英語使用者能瀏覽投資、基金、債券、開戶全流程。盤點全 App 頁面標記可／不可翻譯欄位（金額、風險屬性須保留原文），導入統一翻譯規則並調整版面因應譯後長度。",metric:""},en:{tag:"Fintech · millions of users",name:"CUBE App — AI Live Translation",body:"Brought AI live translation to a mobile bank serving millions, letting English users browse investing, funds, bonds and account-opening. Audited every screen to mark translatable vs. protected fields (amounts, risk levels stay original) and adjusted layouts for translated length.",metric:""},stack:"Kotlin · ConstraintLayout · Flexbox"},
+  {track:"mobile",lang:"Kotlin",icon:"📊",img:"images/cube-review.png",zh:{tag:"金融 · 原生×WebView",name:"CUBE App 年度回顧互動企劃",body:"年度行銷活動頁：互動式回顧＋可分享圖卡，嵌入行銷 Banner 與活動小網。實作分享圖片產生與防連點、Banner 防呆（缺圖／缺文案）、In-App WebView 與 JS Bridge 橋接（縮放展開、白名單控管）。",metric:""},en:{tag:"Fintech · native×WebView",name:"CUBE App — Year-in-Review Campaign",body:"An annual marketing page: interactive recap plus shareable cards, with in-app banners and a mini-web. Built share-image generation with anti-double-tap, banner fallbacks (missing image/copy), and native↔WebView JS-bridge (zoom/expand, whitelist control).",metric:""},stack:"Kotlin · WebView · JS Bridge"},
+  {track:"mobile",lang:"Kotlin",icon:"🧩",img:"images/cube-compose.png",zh:{tag:"金融 · 元件庫 / 重構",name:"CUBE App Jetpack Compose 共用元件庫",body:"將散落的 UI 收斂為可重用 Compose 元件（PrimaryTab / SecondaryTab / ChipButton / Badge），建立統一主題色彩系統（semanticColors），汰換 deprecated API 並補齊 UnitTest 與 Preview。",metric:""},en:{tag:"Fintech · component library",name:"CUBE App — Compose Component Library",body:"Consolidated scattered UI into reusable Compose components (tabs, chip buttons, badges), built a unified semantic color theme, replaced deprecated APIs and added unit tests and previews.",metric:""},stack:"Kotlin · Compose · Material 3 · JUnit"},
+  {track:"mobile",lang:"Kotlin",icon:"🔐",variant:"compact",img:"images/faceid.png",zh:{tag:"個人 · 端上 ML",name:"Face ID 人臉登入",body:"現代 Android 架構自製人臉登入：CameraX 取像、ML Kit 偵測、特徵存入 Room 比對，離線可用。",metric:""},en:{tag:"Personal · on-device ML",name:"Face ID — Face Login",body:"A face-recognition login on a modern Android stack: CameraX capture, ML Kit detection, features in Room for offline matching.",metric:""},stack:"Compose · CameraX · ML Kit · Room"},
+  {track:"mobile",lang:"Kotlin",icon:"📷",variant:"compact",img:"images/camera-app.png",zh:{tag:"外部專案 · Client",name:"海外智慧攝影機育兒 App",body:"主責訂閱會員機制與效能穩定性：重構會員等級判斷、系統性修復記憶體洩漏與 Crash、優化相簿與影片回放。",metric:""},en:{tag:"External · client project",name:"Overseas Smart-Camera Parenting App",body:"Owned subscription logic and stability: rebuilt tier checks, systematically fixed memory leaks and crashes, improved album/playback flows.",metric:""},stack:"Kotlin · Coroutines/Flow · Glide · REST"},
+  {track:"backend",lang:"TypeScript",variant:"compact",zh:{tag:"個人專案",name:"CathayCrossing 虛擬辦公室",body:"Unity 3D ＋ Node.js WebSocket 打造的多人虛擬辦公室，即時位置同步與互動。",metric:""},en:{tag:"Personal",name:"CathayCrossing Virtual Office",body:"A multiplayer virtual office built with Unity 3D and Node.js WebSocket, with realtime position sync.",metric:""},stack:"Unity · Node.js · WebSocket",repo:"https://github.com/henrycai0317"},
+  {track:"mobile",lang:"Kotlin",variant:"compact",zh:{tag:"個人專案 · 端上 ML",name:"Face Detector 人臉比對",body:"以 TFLite 抽取人臉特徵向量並計算相似度，離線比對是否為同一人。",metric:""},en:{tag:"Personal · on-device ML",name:"Face Detector",body:"Extracts face feature vectors with TFLite and compares similarity offline to verify identity.",metric:""},stack:"CameraX · ML Kit · TFLite",repo:"https://github.com/henrycai0317"},
+  {track:"backend",lang:"Python",variant:"compact",zh:{tag:"個人專案 · AI",name:"Voice Agent 語音對話代理",body:"FastAPI 串接 OpenAI 的語音對話代理雛形，支援文字與語音互動。",metric:""},en:{tag:"Personal · AI",name:"Voice Agent",body:"A voice conversational-agent prototype wiring FastAPI to OpenAI, with text and voice interaction.",metric:""},stack:"Python · FastAPI · OpenAI",repo:"https://github.com/henrycai0317"},
+  {track:"mobile",lang:"Kotlin",variant:"compact",zh:{tag:"個人專案 · 元件",name:"Drag & Drop 清單元件",body:"封裝可拖曳排序＋左滑選單的 RecyclerView 元件，以 DiffUtil 高效更新、處理停用與排序邊界。",metric:""},en:{tag:"Personal · component",name:"Drag & Drop List",body:"A reusable drag-sort + swipe RecyclerView component; efficient DiffUtil updates handling disabled and ordering edge cases.",metric:""},stack:"Kotlin · ItemTouchHelper · DiffUtil",repo:"https://github.com/henrycai0317"},
+  {track:"backend",lang:"TypeScript",variant:"compact",zh:{tag:"團隊專案 · 前端",name:"CUBE 內部發版控制台",body:"團隊自建的 CI 發版管理後台，我負責分享圖卡與使用統計模組（16:9 自適應截圖、埋點）。",metric:""},en:{tag:"Team · frontend",name:"CUBE Internal Release Console",body:"A team-built CI release dashboard; I built the share-card and usage-stats modules (16:9 adaptive screenshots, analytics).",metric:""},stack:"Next.js · React · Tailwind"}
+];
+const grid=document.getElementById('pgrid');
+function renderProjects(){
+  const en=document.documentElement.lang==='en';
+  grid.innerHTML=projects.map(function(p){
+    const t=en?p.en:p.zh;
+    const foot=p.repo
+      ? '<a href="'+p.repo+'" target="_blank" rel="noopener">↗ GitHub</a>'
+      : '<span class="intl">'+(en?'internal product':'公司內部產品')+'</span>';
+    const metric=t.metric?'<div class="cmetric">▸ '+t.metric+'</div>':'';
+    // thin tech band at top — primary stack shown, no image needed
+    const band='<div class="band"><span class="dot"></span>'+p.stack.split(' · ')[0]
+      +'<span class="bnum">'+p.lang+'</span></div>';
+    var cls=p.variant?(' '+p.variant):'';
+    return '<article class="card'+cls+'">'
+      +band
+      +'<div class="cin">'
+      +'<div class="ctop"><span class="ctag">'+t.tag+'</span><span class="clang">'+p.stack+'</span></div>'
+      +'<h4>'+(p.star?'<span class="star">★</span> ':'')+t.name+'</h4><div class="cbody">'+t.body+'</div>'+metric
+      +'<div class="cfoot">'+foot+'</div>'
+      +'</div></article>';
+  }).join('');
+  requestAnimationFrame(function(){requestAnimationFrame(buildCarousel);});
+}
+renderProjects();
+
+/* ---------- carousel ---------- */
+var carTrack=document.getElementById('pgrid');
+var carPrev=document.getElementById('carPrev');
+var carNext=document.getElementById('carNext');
+var carDots=document.getElementById('carDots');
+var carCur=document.getElementById('carCur');
+var carTot=document.getElementById('carTot');
+function carStep(){
+  var card=carTrack.querySelector('.card');
+  if(!card)return carTrack.clientWidth;
+  var gap=parseFloat(getComputedStyle(carTrack).gap)||22;
+  return card.getBoundingClientRect().width+gap;
+}
+function carPerView(){
+  var card=carTrack.querySelector('.card');
+  if(!card)return 1;
+  return Math.max(1,Math.round(carTrack.clientWidth/carStep()));
+}
+function carPages(){
+  var n=carTrack.querySelectorAll('.card').length;
+  return Math.max(1,n-carPerView()+1);
+}
+function carIndex(){
+  return Math.round(carTrack.scrollLeft/carStep());
+}
+function buildCarousel(){
+  var cards=carTrack.querySelectorAll('.card');
+  carTot.textContent=cards.length;
+  // dots = one per card position (snap points)
+  var pages=carPages();
+  carDots.innerHTML='';
+  for(var i=0;i<pages;i++){
+    var d=document.createElement('button');
+    d.className='cardot'+(i===0?' on':'');
+    d.setAttribute('aria-label','Go to slide '+(i+1));
+    (function(idx){d.onclick=function(){carTrack.scrollTo({left:idx*carStep()});};})(i);
+    carDots.appendChild(d);
+  }
+  updateCar();
+}
+function updateCar(){
+  var idx=carIndex();
+  carCur.textContent=idx+1;
+  carPrev.disabled=idx<=0;
+  carNext.disabled=idx>=carPages()-1;
+  var dots=carDots.querySelectorAll('.cardot');
+  dots.forEach(function(d,i){d.classList.toggle('on',i===idx);});
+}
+carPrev.onclick=function(){carTrack.scrollBy({left:-carStep()});};
+carNext.onclick=function(){carTrack.scrollBy({left:carStep()});};
+var carRaf;
+carTrack.addEventListener('scroll',function(){
+  if(carRaf)cancelAnimationFrame(carRaf);
+  carRaf=requestAnimationFrame(updateCar);
+},{passive:true});
+window.addEventListener('resize',buildCarousel);
+
+document.querySelectorAll('.atab').forEach(function(b){
+  b.onclick=function(){
+    document.querySelectorAll('.atab').forEach(function(x){x.classList.remove('on')});
+    document.querySelectorAll('.apanel').forEach(function(x){x.classList.remove('on')});
+    b.classList.add('on');
+    document.querySelector('.apanel[data-p="'+b.dataset.t+'"]').classList.add('on');
+  };
+});
+function setLang(l){
+  document.documentElement.lang=l==='en'?'en':'zh-Hant';
+  document.getElementById('zhBtn').classList.toggle('on',l==='zh');
+  document.getElementById('enBtn').classList.toggle('on',l==='en');
+  renderProjects();
+}
+function toggleTheme(){
+  var cur=document.documentElement.getAttribute('data-theme');
+  var next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  document.getElementById('themebtn').textContent=next==='dark'?'☀':'☾';
+}
+function toggleNav(){
+  var nav=document.getElementById('nav');
+  nav.classList.contains('open')?closeNav():openNav();
+}
+function openNav(){
+  document.getElementById('nav').classList.add('open');
+  document.getElementById('navscrim').classList.add('open');
+  document.getElementById('hamb').classList.add('open');
+  document.getElementById('hamb').setAttribute('aria-expanded','true');
+  document.body.classList.add('navopen');
+}
+function closeNav(){
+  document.getElementById('nav').classList.remove('open');
+  document.getElementById('navscrim').classList.remove('open');
+  document.getElementById('hamb').classList.remove('open');
+  document.getElementById('hamb').setAttribute('aria-expanded','false');
+  document.body.classList.remove('navopen');
+}
+document.querySelectorAll('#nav a').forEach(function(a){a.addEventListener('click',closeNav);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav();});
+var reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+var logEl=document.getElementById('log');
+var lines=[
+  '<span class="c">// resolving profile...</span>',
+  '<span class="p">&gt;</span> <span class="k">name</span> = <span class="v">"Henry Cai / 蔡昶宏"</span>',
+  '<span class="p">&gt;</span> <span class="k">role</span> = <span class="v">"Software Engineer · 5+ yrs"</span>',
+  '<span class="p">&gt;</span> <span class="k">stack</span> = <span class="v">"full-stack · Android → backend"</span>',
+  '<span class="p">&gt;</span> <span class="k">tools</span> = [<span class="v">Kotlin, Compose, Spring&nbsp;Boot, Node.js</span>]',
+  '<span class="p">&gt;</span> <span class="k">remote</span> = <span class="v">true</span> <span class="c">// fully remote only</span>',
+  '<span class="ok">✓ build successful</span> <span class="c">— ready to ship.</span>'
+];
+function typeLog(){
+  logEl.innerHTML='';
+  if(reduce){logEl.innerHTML=lines.map(function(l){return '<span class="ln" style="opacity:1;transform:none">'+l+'</span>'}).join('')+'<span class="caret"></span>';return;}
+  var i=0;
+  (function next(){
+    if(i>=lines.length){var c=document.createElement('span');c.className='caret';logEl.appendChild(c);return;}
+    var s=document.createElement('span');s.className='ln';s.innerHTML=lines[i];logEl.appendChild(s);
+    i++;setTimeout(next,i===1?260:440);
+  })();
+}
+typeLog();
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+if(!reduce){
+  var spot=document.getElementById('spot');
+  window.addEventListener('pointermove',function(e){spot.style.opacity='1';spot.style.left=e.clientX+'px';spot.style.top=e.clientY+'px';},{passive:true});
+  window.addEventListener('pointerleave',function(){spot.style.opacity='0'});
+}
+</script>
+</body>
+</html>
