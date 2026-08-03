@@ -1,9 +1,10 @@
-# henry_cai.dev — Personal Portfolio
+# Henry Cai — Personal Portfolio
 
-A single-file, zero-build personal portfolio for **Henry Cai (蔡昶宏)** — Android × Backend full-stack engineer.
+A single-file, zero-build personal portfolio for **Henry Cai (蔡昶宏)** — mobile engineer working in
+Kotlin, Jetpack Compose and Kotlin Multiplatform, extending into backend.
 Bilingual (English / 繁體中文), dark & light themes, fully responsive.
 
-**Live:** https://henrycai0317.github.io/henry_profolio/
+**Live:** https://henrycai0317.github.io/henry_portfolio/
 
 ---
 
